@@ -1624,71 +1624,7 @@ function getFamilyFit(a) {
   return '👥 ' + parts.slice(0, 2).join(' · ');
 }
 
-function refreshUnselected() {
-  var d = state.results;
-  var city = d.city;
-  var pool = getActivities(city);
 
-  // Indices sélectionnés → activités à garder
-  var keptActivities = [];
-  for (var ki = 0; ki < state.selectedActivities.length; ki++) {
-    var idx = state.selectedActivities[ki];
-    if (d.activities[idx]) keptActivities.push(d.activities[idx]);
-  }
-
-  // Tous les noms déjà vus (pas seulement la liste actuelle)
-  if (!state.usedNames) state.usedNames = [];
-  for (var ui = 0; ui < d.activities.length; ui++) {
-    if (state.usedNames.indexOf(d.activities[ui].name) === -1) {
-      state.usedNames.push(d.activities[ui].name);
-    }
-  }
-
-  // Activités fraîches jamais montrées
-  var fresh = [];
-  for (var pi = 0; pi < pool.length; pi++) {
-    if (state.usedNames.indexOf(pool[pi].name) === -1) {
-      fresh.push(pool[pi]);
-    }
-  }
-
-  var nbReplace = d.activities.length - keptActivities.length;
-
-  if (fresh.length === 0) {
-    alert('Toutes les activités disponibles ont déjà été affichées pour ' + city + ' !');
-    return;
-  }
-
-  // Prendre les remplaçants nécessaires
-  var taken = Math.min(nbReplace, fresh.length);
-  var replacements = [];
-  for (var ri = 0; ri < taken; ri++) {
-    var a = fresh[ri];
-    replacements.push({
-      name: a.name, category: a.cat, description: a.desc,
-      price: a.price, duration: a.dur, tags: [a.cat], tip: a.tip
-    });
-    state.usedNames.push(a.name);
-  }
-
-  // Construire la nouvelle liste : gardées d'abord, puis nouvelles
-  var newActivities = [];
-  for (var ni = 0; ni < keptActivities.length; ni++) {
-    newActivities.push(Object.assign({}, keptActivities[ni], {rank: ni+1}));
-  }
-  for (var rj = 0; rj < replacements.length; rj++) {
-    newActivities.push(Object.assign({}, replacements[rj], {rank: keptActivities.length + rj + 1}));
-  }
-
-  state.results.activities = newActivities;
-  // Re-sélectionner les activités gardées (indices 0..keptActivities.length-1)
-  state.selectedActivities = [];
-  for (var si = 0; si < keptActivities.length; si++) {
-    state.selectedActivities.push(si);
-  }
-
-  renderResults(document.getElementById('appRoot'));
-}
 
 function nextStep() { state.step = Math.min(state.step + 1, 9); render(); }
 function prevStep() { state.step = Math.max(state.step - 1, 0); render(); }
